@@ -7,6 +7,7 @@ import {
 import { SunIcon, MoonIcon } from "@chakra-ui/icons";
 import { uploadNomenclature, predictSubstitutes } from "./api/fastapi";
 import { PieChart, Pie, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import logo from "./assets/LOGO_SMEKER.png";
 
 const theme = extendTheme({
   styles: {
@@ -60,17 +61,36 @@ export default function App() {
   return (
     <ChakraProvider theme={theme}>
       <Box minH="100vh" p={10}>
-        <Flex justify="space-between" align="center" mb={10}>
-          <Heading size="2xl" bgGradient="linear(to-r, teal.300, blue.500)" bgClip="text">🚀 AI Substitution Dashboard</Heading>
-          <IconButton
-            icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-            onClick={toggleColorMode}
-            size="lg"
-            colorScheme="teal"
-            variant="outline"
-            aria-label="Toggle Dark Mode"
+      <Flex justify="space-between" align="center" mb={10}>
+        <Flex align="center" height="100px">
+          <img
+            src={logo}
+            alt="Logo"
+            style={{
+              height: "150%",
+              objectFit: "contain",
+            }}
           />
+          <Box ml={4} lineHeight="1.2">
+            <Text fontSize="2xl" fontWeight="bold">
+              PAIRADOX.AI
+            </Text>
+            <Text fontSize="sm" color="gray.500">
+              for when something's missing
+            </Text>
+          </Box>
         </Flex>
+
+        <IconButton
+          icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+          onClick={toggleColorMode}
+          size="lg"
+          colorScheme="teal"
+          variant="outline"
+          aria-label="Toggle Dark Mode"
+        />
+      </Flex>
+
 
         {/* UPLOAD + PREDICT */}
         <HStack spacing={10} mb={10} align="flex-start">
