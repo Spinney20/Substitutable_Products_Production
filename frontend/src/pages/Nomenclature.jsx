@@ -9,6 +9,12 @@ import {
   VStack,
   Flex,
   Spinner,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
 } from "@chakra-ui/react";
 import { uploadNomenclature } from "../api/fastapi";
 import axios from "axios";
@@ -84,7 +90,7 @@ export default function Nomenclature() {
         setClearLoading(true);
         await axios.delete(`${BASE_URL}/clear-nomenclature`);
         setNomenclatureInfo({ exists: false });
-        setUploadResult("Nomenclature cleared.");
+        setUploadResult("Nomenclator cleared.");
         setShowNomenclator(false);
       } catch (err) {
         console.error(err);
@@ -151,10 +157,12 @@ export default function Nomenclature() {
                 p={6}
                 rounded="2xl"
                 shadow="2xl"
-                w={{ base: "100%", md: "60%" }}
+                w={{ base: "100%", md: "80%" }}
+                maxH="400px"         // Înălțime maximă
+                overflowY="auto"    // Scroll vertical
               >
                 <Heading size="md" mb={4}>
-                  Current Nomenclature
+                  Current Nomenclator
                 </Heading>
                 <Text>
                   <strong>Last Upload:</strong> {nomenclatureInfo.lastUpload}
@@ -162,18 +170,42 @@ export default function Nomenclature() {
                 <Text>
                   <strong>Number of Products:</strong> {nomenclatureInfo.productCount}
                 </Text>
+
                 <Box mt={4}>
                   <Heading size="sm" mb={2}>
                     Products:
                   </Heading>
                   {nomenclatureInfo.products && nomenclatureInfo.products.length > 0 ? (
-                    <VStack spacing={2} align="stretch">
-                      {nomenclatureInfo.products.map((product, idx) => (
-                        <Box key={idx} bg="gray.700" p={4} rounded="lg" shadow="md">
-                          <Text>{product}</Text>
-                        </Box>
-                      ))}
-                    </VStack>
+                    <Table variant="simple" size="sm">
+                      <Thead>
+                        <Tr>
+                          <Th>ID</Th>
+                          <Th>Articol</Th>
+                          <Th>Piata</Th>
+                          <Th>Segment</Th>
+                          <Th>Categorie</Th>
+                          <Th>Familie</Th>
+                          <Th>Pret</Th>
+                          <Th>Provenienta</Th>
+                          <Th>Premium</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {nomenclatureInfo.products.map((row, idx) => (
+                          <Tr key={idx}>
+                            <Td>{row.ID}</Td>
+                            <Td>{row.Articol}</Td>
+                            <Td>{row.Piata}</Td>
+                            <Td>{row.Segment}</Td>
+                            <Td>{row.Categorie}</Td>
+                            <Td>{row.Familie}</Td>
+                            <Td>{row.Pret}</Td>
+                            <Td>{row.Provenienta}</Td>
+                            <Td>{row.Premium}</Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
                   ) : (
                     <Text>No products found.</Text>
                   )}
@@ -183,7 +215,7 @@ export default function Nomenclature() {
           </>
         ) : (
           <Text color="orange.300" fontSize="lg">
-            ⚠️ No nomenclature found. Please upload.
+            ⚠️ No nomenclator found. Please upload.
           </Text>
         )}
       </Flex>
