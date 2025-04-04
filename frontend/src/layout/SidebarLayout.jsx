@@ -74,7 +74,7 @@ export default function SidebarLayout() {
             color="white"
             justifyContent={isCollapsed ? "center" : "flex-start"}
           >
-            Upload
+            Nomenclature
           </Button>
         </VStack>
       </Box>
