@@ -1,9 +1,14 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 import pandas as pd
 import re
 import math
 from io import BytesIO
 from fastapi.middleware.cors import CORSMiddleware
+import os
+import shutil
+
+from datetime import datetime
+from fastapi import HTTPException
 
 app = FastAPI()
 
@@ -17,43 +22,107 @@ app.add_middleware(
 
 # Global storages
 tree = {}
-product_index = {}
+product_index = {}     # folosit pentru predicții (tuplu)
+product_details = {}   # folosit pentru afișarea completă (dicționar)
 historical_subs = {}
 train_count = {}
+
+# Calea fișierului nomenclator local
+LOCAL_NOMENCLATURE_FILE = "data/nomenclature.xlsx"
 
 ########################################
 # Nomenclature Loading Logic
 ########################################
 
 def load_nomenclature(filepath=None, df=None):
-    global tree, product_index
+    """
+    Încarcă nomenclatorul fie dintr-un fișier Excel, fie dintr-un DataFrame,
+    și actualizează variabilele globale:
+      - 'tree' și 'product_index' (tuplu) pentru predicții
+      - 'product_details' (dict) pentru afișarea completă în UI
+    """
+    global tree, product_index, product_details
+
     if df is None:
+        if filepath is None:
+            raise ValueError("Trebuie specificat fie filepath, fie df")
         df = pd.read_excel(filepath)
+
+    # Resetăm structurile
     tree = {}
     product_index = {}
+    product_details = {}
 
     for idx, row in df.iterrows():
-        product_code = row.iloc[0]
-        text_value = str(row.iloc[1])
+        # Aici presupunem că ordinea coloanelor din Excel este:
+        # 0: ID
+        # 1: Articol (nume complet)
+        # 2: Piață
+        # 3: Segment
+        # 4: Categorie
+        # 5: Familie
+        # 6: Preț
+        # 7: Proveniență
+        # 8: Premium
+        # Ajustează dacă ordinea reală e alta.
+
+        product_code = row.iloc[0]   # ID
+        text_value = str(row.iloc[1])  # Articol
         brand_match = re.search(r"BRAND\s*(\d+)", text_value, re.IGNORECASE)
         brand = brand_match.group(1) if brand_match else "N/A"
 
-        market, segment, category, family = row.iloc[2:6]
-        price, origin, premium = row.iloc[6:9]
+        market      = row.iloc[2]
+        segment     = row.iloc[3]
+        category    = row.iloc[4]
+        family      = row.iloc[5]
+        price       = row.iloc[6]
+        origin      = row.iloc[7]
+        premium     = row.iloc[8]
 
-        tree.setdefault(market, {}).setdefault(segment, {}).setdefault(category, {}).setdefault(family, []).append(product_code)
+        # 1) Actualizăm structura 'tree' + 'product_index' (pentru predicții)
+        tree.setdefault(market, {}).setdefault(segment, {})\
+            .setdefault(category, {}).setdefault(family, []).append(product_code)
 
+        # Tuplu pentru codul de predicție
         product_index[product_code] = (
             market, segment, category, family, brand, price, origin, premium
         )
 
+        # 2) Actualizăm 'product_details' cu TOT ce vrei să afișezi în UI
+        product_details[product_code] = {
+            "ID": product_code,
+            "Articol": text_value,
+            "Piata": market,
+            "Segment": segment,
+            "Categorie": category,
+            "Familie": family,
+            "Pret": price,
+            "Provenienta": origin,
+            "Premium": premium,
+            # Păstrăm și brand-ul dacă vrei să-l afișezi ulterior
+            "Brand": brand,
+        }
+
+# La startup, dacă fișierul nomenclator există local, îl încărcăm
+if os.path.exists(LOCAL_NOMENCLATURE_FILE):
+    try:
+        load_nomenclature(filepath=LOCAL_NOMENCLATURE_FILE)
+        print("Nomenclatorul a fost încărcat de pe disc.")
+    except Exception as e:
+        print("Eroare la încărcarea nomenclatorului:", e)
+else:
+    print("Nomenclatorul nu există încă. Așteptăm upload-ul.")
+
 @app.post("/load-nomenclature")
 async def api_load_nomenclature(file: UploadFile = File(...)):
     try:
-        contents = await file.read()
-        df = pd.read_excel(BytesIO(contents))
-        load_nomenclature(df=df)
-        return {"message": "Nomenclature loaded successfully!"}
+        os.makedirs("data", exist_ok=True)
+        # Salvează fișierul uploadat pe disc
+        with open(LOCAL_NOMENCLATURE_FILE, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        # Încarcă nomenclatorul din fișierul salvat
+        load_nomenclature(filepath=LOCAL_NOMENCLATURE_FILE)
+        return {"message": "Nomenclature loaded and saved successfully!"}
     except Exception as e:
         return {"error": str(e)}
 
@@ -147,6 +216,47 @@ def train_model(data: dict):
         train_count[product_out_id] = train_count.get(product_out_id, 0) + 1
 
     return {"message": f"Trained product {product_out_id}"}
+
+########################################
+# Nomenclature Info and Clear Endpoints
+########################################
+
+@app.get("/nomenclature-info")
+def nomenclature_info():
+    if os.path.exists(LOCAL_NOMENCLATURE_FILE):
+        # Obține timestamp-ul ultimei modificări
+        last_upload_ts = os.path.getmtime(LOCAL_NOMENCLATURE_FILE)
+        last_upload = datetime.fromtimestamp(last_upload_ts).strftime("%Y-%m-%d %H:%M:%S")
+        # Numărul de produse, folosind datele încărcate în memorie
+        product_count = len(product_details)  # sau len(product_index)
+        # Construim un array de obiecte cu toată informația
+        # (ID, Articol, Piață, Segment, Categorie, Familie, Preț, Proveniență, Premium etc.)
+        products_list = list(product_details.values())
+
+        return {
+            "exists": True,
+            "lastUpload": last_upload,
+            "productCount": product_count,
+            "products": products_list
+        }
+    else:
+        return {"exists": False}
+
+@app.delete("/clear-nomenclature")
+def clear_nomenclature():
+    if os.path.exists(LOCAL_NOMENCLATURE_FILE):
+        try:
+            os.remove(LOCAL_NOMENCLATURE_FILE)
+            # Resetăm variabilele globale
+            global tree, product_index, product_details
+            tree = {}
+            product_index = {}
+            product_details = {}
+            return {"message": "Nomenclature cleared successfully."}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    else:
+        raise HTTPException(status_code=404, detail="Nomenclature file not found.")
 
 if __name__ == "__main__":
     import uvicorn
