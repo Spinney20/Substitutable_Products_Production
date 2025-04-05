@@ -8,18 +8,16 @@ import {
   Button,
   VStack,
   useColorMode,
-  useColorModeValue,
-  Image,
+  Image
 } from "@chakra-ui/react";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
   SunIcon,
-  MoonIcon,
+  MoonIcon
 } from "@chakra-ui/icons";
-
-// Importăm logo-ul
 import logo from "../assets/LOGO_SMEKER.png";
+import LanguageDropdown from "../components/LanguageDropdown";
 
 export default function SidebarLayout() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -27,7 +25,7 @@ export default function SidebarLayout() {
 
   return (
     <Flex minH="100vh">
-      {/* SIDEBAR (stânga) */}
+      {/* Sidebar */}
       <Box
         bg="whiteAlpha.200"
         w={isCollapsed ? "70px" : "200px"}
@@ -35,15 +33,9 @@ export default function SidebarLayout() {
         p={3}
       >
         <Flex justify="space-between" align="center" mb={4}>
-          {/* Titlu Meniu (ascuns dacă e collapsed) */}
           {!isCollapsed && (
-            <Text
-              fontSize="lg"
-              fontWeight="bold"
-              color="teal.200"
-              ml={2}
-            >
-              MENIU
+            <Text fontSize="lg" fontWeight="bold" color="teal.200" ml={2}>
+              MENU
             </Text>
           )}
           <IconButton
@@ -66,7 +58,6 @@ export default function SidebarLayout() {
           >
             Dashboard
           </Button>
-
           <Button
             as={Link}
             to="/nomenclature"
@@ -79,18 +70,11 @@ export default function SidebarLayout() {
         </VStack>
       </Box>
 
-      {/* CONȚINUT (dreapta) */}
+      {/* Main content */}
       <Flex direction="column" flex="1">
-        {/* TOP BAR (sus) */}
-        <Flex
-          justify="space-between"
-          align="center"
-          p={4}
-          // un mic fundal semitransparent
-          bg="whiteAlpha.100"
-          shadow="md"
-        >
-          {/* Logo + titlu */}
+        {/* Top bar */}
+        <Flex justify="space-between" align="center" p={4} bg="whiteAlpha.100" shadow="md">
+          {/* Logo + Title */}
           <Flex align="center" height="60px">
             <Image
               src={logo}
@@ -108,18 +92,21 @@ export default function SidebarLayout() {
             </Box>
           </Flex>
 
-          {/* Buton toggle dark/light */}
-          <IconButton
-            icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-            onClick={toggleColorMode}
-            size="lg"
-            colorScheme="teal"
-            variant="outline"
-            aria-label="Toggle Dark Mode"
-          />
+          {/* Language + Dark mode */}
+          <Flex align="center" gap={3}>
+            <LanguageDropdown />
+            <IconButton
+              icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+              onClick={toggleColorMode}
+              size="lg"
+              colorScheme="teal"
+              variant="outline"
+              aria-label="Toggle Dark Mode"
+            />
+          </Flex>
         </Flex>
 
-        {/* Aici se încarcă paginile (Dashboard / Nomenclature) */}
+        {/* Content */}
         <Box flex="1">
           <Outlet />
         </Box>
