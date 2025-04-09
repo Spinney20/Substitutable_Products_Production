@@ -7,6 +7,8 @@ import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import SidebarLayout from "./layout/SidebarLayout";
 import Dashboard from "./pages/Dashboard";
 import Nomenclature from "./pages/Nomenclature";
+import TrainModel from "./pages/TrainModel";
+import Reports from "./pages/Reports";
 
 // Importăm CSS-urile existente
 import "./index.css";
@@ -36,6 +38,9 @@ createRoot(document.getElementById("root")).render(
 
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="nomenclature" element={<Nomenclature />} />
+
+            <Route path="train-model" element={<TrainModel />} />
+            <Route path="reports" element={<Reports />} />
 
             {/* poți adăuga altele, dacă vei avea */}
           </Route>

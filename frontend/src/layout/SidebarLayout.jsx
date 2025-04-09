@@ -67,6 +67,24 @@ export default function SidebarLayout() {
           >
             Nomenclature
           </Button>
+          <Button
+            as={Link}
+            to="/train-model"
+            variant="ghost"
+            color="white"
+            justifyContent={isCollapsed ? "center" : "flex-start"}
+          >
+            Train Model
+          </Button>
+          <Button
+            as={Link}
+            to="/reports"
+            variant="ghost"
+            color="white"
+            justifyContent={isCollapsed ? "center" : "flex-start"}
+          >
+            Reports
+          </Button>
         </VStack>
       </Box>
 
