@@ -37,7 +37,7 @@ export default function Reports() {
   };
 
   return (
-    <Box minH="100vh" p={10}>
+    <Box flex="1" height="100%" p={10} overflowY="auto">
       {/* Card pentru Reports */}
       <Flex justify="center" align="flex-start">
         <Box
@@ -52,7 +52,7 @@ export default function Reports() {
             📊 Reports
           </Heading>
           <Text mb={6}>
-            Generați rapoarte despre produsele din nomenclator, substituții, vânzări, etc.
+            Generate custom reports based on your data. Click the button below to generate reports.
           </Text>
 
           <HStack spacing={4}>

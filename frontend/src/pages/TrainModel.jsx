@@ -34,7 +34,7 @@ export default function TrainModel() {
   };
 
   return (
-    <Box minH="100vh" p={10}>
+    <Box flex="1" height="100%" p={10} overflowY="auto">
       {/* Card pentru Train Model */}
       <Flex justify="center" align="flex-start">
         <Box

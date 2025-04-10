@@ -102,7 +102,7 @@ export default function Nomenclature() {
   };
 
   return (
-    <Box minH="100vh" p={10}>
+    <Box flex="1" height="100%" p={10} overflowY="auto">
       {/* Card pentru Upload */}
       <Flex justify="center" align="flex-start">
         <Box

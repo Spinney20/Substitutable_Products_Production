@@ -47,7 +47,7 @@ export default function Dashboard() {
   };
 
   return (
-    <Box minH="100vh" p={10}>
+    <Box flex="1" height="100%" p={10} overflowY="auto">
       {/* Cardul de Predict Substitutes */}
       <Flex justify="center" align="flex-start">
         <Box
