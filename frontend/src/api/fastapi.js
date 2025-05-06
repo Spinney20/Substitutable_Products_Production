@@ -1,16 +1,19 @@
-import axios from 'axios';
+// src/api/fastapi.js
+import axios from "axios";
 
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = "http://127.0.0.1:8000";
 
-export const uploadNomenclature = async (file) => {
+/*  POST /load-nomenclature  –   trimite nomenclatorul + vânzările  */
+export const uploadNomenclature = (nomFile, salesFile) => {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append("nomenclature", nomFile);   // trebuie să fie exact acelaşi key
+  formData.append("sales",        salesFile); // ca în backend
 
   return axios.post(`${BASE_URL}/load-nomenclature`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+    headers: { "Content-Type": "multipart/form-data" },
   });
 };
 
-export const predictSubstitutes = async (productId) => {
-  return axios.get(`${BASE_URL}/predict/${productId}`);
-};
+/* apel existent */
+export const predictSubstitutes = (productId) =>
+  axios.get(`${BASE_URL}/predict/${productId}`);

@@ -22,7 +22,8 @@ import axios from "axios";
 const BASE_URL = "http://127.0.0.1:8000";
 
 export default function Nomenclature() {
-  const [file, setFile] = useState(null);
+  const [nomFile,   setNomFile]   = useState(null);
+  const [salesFile, setSalesFile] = useState(null);
   const [uploadResult, setUploadResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [nomenclatureInfo, setNomenclatureInfo] = useState(null);
@@ -47,13 +48,13 @@ export default function Nomenclature() {
 
   // Upload fișier
   const handleUpload = async () => {
-    if (!file) {
-      alert("Select a file");
-      return;
-    }
+    if (!nomFile || !salesFile) {
+        alert("Selectează *ambele* fișiere: nomenclator și sales");
+        return;
+      }
     try {
       setLoading(true);
-      const res = await uploadNomenclature(file);
+      const res = await uploadNomenclature(nomFile, salesFile);
       setUploadResult(res.data.message);
       // Reîmprospătăm informațiile nomenclatorului după upload
       checkNomenclature();
@@ -117,12 +118,24 @@ export default function Nomenclature() {
             📥 Upload Nomenclature
           </Heading>
           <HStack>
-            <Input
-              type="file"
-              onChange={(e) => setFile(e.target.files[0])}
-              bg="whiteAlpha.300"
-              border="none"
-            />
+          <VStack align="stretch" w="100%" spacing={3}>
+   <Input
+     type="file"
+     accept=".xlsx"
+     onChange={(e) => setNomFile(e.target.files[0])}
+     bg="whiteAlpha.300"
+     border="none"
+     placeholder="Nomenclator (.xlsx)"
+   />
+   <Input
+     type="file"
+     accept=".xlsx"
+     onChange={(e) => setSalesFile(e.target.files[0])}
+     bg="whiteAlpha.300"
+     border="none"
+     placeholder="Sales (.xlsx)"
+   />
+ </VStack>
             <Button colorScheme="teal" onClick={handleUpload}>
               {loading ? "Uploading..." : "Upload"}
             </Button>
@@ -136,7 +149,7 @@ export default function Nomenclature() {
       </Flex>
 
       {/* Secțiunea de informații și acțiuni pentru nomenclator */}
-      <Flex mt={10} justify="center" align="center" direction="column">
+      <Flex mt={8} justify="center" align="center" direction="column">
         {nomenclatureInfo && nomenclatureInfo.exists ? (
           <>
             <Text color="green.300" mb={4} fontSize="lg">
