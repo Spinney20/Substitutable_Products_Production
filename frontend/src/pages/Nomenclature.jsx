@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Heading,
@@ -84,6 +84,9 @@ export default function Nomenclature() {
     }
   };
 
+  const nomInputRef   = useRef(null);
+  const salesInputRef = useRef(null);
+
   // Ștergere nomenclator (cu confirmare)
   const handleClear = async () => {
     if (window.confirm("Are you sure you want to clear the current nomenclature?")) {
@@ -102,6 +105,10 @@ export default function Nomenclature() {
     }
   };
 
+  const shortName = (file, fallback) =>
+    file ? (file.name.length > 22 ? file.name.slice(0, 19) + "…" : file.name)
+         : fallback;
+
   return (
     <Box flex="1" height="100%" p={10} overflowY="auto">
       {/* Card pentru Upload */}
@@ -117,29 +124,44 @@ export default function Nomenclature() {
           <Heading size="md" mb={4}>
             📥 Upload Nomenclature
           </Heading>
-          <HStack>
-          <VStack align="stretch" w="100%" spacing={3}>
-   <Input
-     type="file"
-     accept=".xlsx"
-     onChange={(e) => setNomFile(e.target.files[0])}
-     bg="whiteAlpha.300"
-     border="none"
-     placeholder="Nomenclator (.xlsx)"
-   />
-   <Input
-     type="file"
-     accept=".xlsx"
-     onChange={(e) => setSalesFile(e.target.files[0])}
-     bg="whiteAlpha.300"
-     border="none"
-     placeholder="Sales (.xlsx)"
-   />
- </VStack>
-            <Button colorScheme="teal" onClick={handleUpload}>
-              {loading ? "Uploading..." : "Upload"}
-            </Button>
-          </HStack>
+          <HStack align="flex-end" spacing={4}>     {/* ⇐ înlocuiește */}
+  {/* ========= Nomenclator ========= */}
+  <input
+    ref={nomInputRef}
+    type="file"
+    accept=".xlsx"
+    style={{ display: "none" }}
+    onChange={(e) => setNomFile(e.target.files[0])}
+  />
+  <Button
+    variant="outline"
+    w="300px"
+    onClick={() => nomInputRef.current.click()}
+  >
+    {shortName(nomFile, "Choose Nomenclature")}
+  </Button>
+
+  {/* ========= Sales ========= */}
+  <input
+    ref={salesInputRef}
+    type="file"
+    accept=".xlsx"
+    style={{ display: "none" }}
+    onChange={(e) => setSalesFile(e.target.files[0])}
+  />
+  <Button
+    variant="outline"
+    w="300px"
+    onClick={() => salesInputRef.current.click()}
+  >
+    {shortName(salesFile, "Choose Sales")}
+  </Button>
+
+  {/* ========= Upload ========= */}
+  <Button colorScheme="teal" onClick={handleUpload} minW="100px">
+    {loading ? "Uploading…" : "Upload"}
+  </Button>
+</HStack>
           {uploadResult && (
             <Text mt={4} color="green.300">
               {uploadResult}
@@ -198,9 +220,8 @@ export default function Nomenclature() {
                           <Th>Segment</Th>
                           <Th>Categorie</Th>
                           <Th>Familie</Th>
-                          <Th>Pret</Th>
+                          <Th isNumeric>Pret mediu</Th>
                           <Th>Provenienta</Th>
-                          <Th>Premium</Th>
                         </Tr>
                       </Thead>
                       <Tbody>
@@ -212,9 +233,8 @@ export default function Nomenclature() {
                             <Td>{row.Segment}</Td>
                             <Td>{row.Categorie}</Td>
                             <Td>{row.Familie}</Td>
-                            <Td>{row.Pret}</Td>
+                            <Td isNumeric>{Number(row.Pret).toFixed(2)}</Td>
                             <Td>{row.Provenienta}</Td>
-                            <Td>{row.Premium}</Td>
                           </Tr>
                         ))}
                       </Tbody>
